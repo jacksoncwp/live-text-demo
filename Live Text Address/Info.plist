@@ -62,7 +62,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>Privacy – Camera Usage Description</key>
+	<key>NSCameraUsageDescription</key>
 	<string>To enable Live Text, please allow the use of camera</string>
 </dict>
 </plist>

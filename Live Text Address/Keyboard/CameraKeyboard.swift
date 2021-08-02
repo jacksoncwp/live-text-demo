@@ -10,10 +10,13 @@ import UIKit
 
 class CameraKeyboard: UIView {
 
+    private var captureSession: AVCaptureSession?
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+
     private lazy var aimContainerView: UIView = {
         let view = UIView(frame: self.frame)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .red // TODO: update
+        view.backgroundColor = .clear
         view.alpha = 0.7
 
         return view
@@ -35,7 +38,7 @@ class CameraKeyboard: UIView {
     }
 
     private func commonInit() {
-        backgroundColor = .white
+        backgroundColor = .clear
 
         NotificationCenter.default.addObserver(
             self,
@@ -51,10 +54,10 @@ class CameraKeyboard: UIView {
             aimContainerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             aimContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
-        addAim()
+        addAimView()
     }
 
-    private func addAim() {
+    private func addAimView() {
         let upperView = UIView()
         let lowerView = UIView()
         let leftView = UIView()
@@ -99,5 +102,78 @@ class CameraKeyboard: UIView {
             return
         }
         frame = .init(origin: .zero, size: keyboardFrame.size)
+    }
+
+    public func startCamera() {
+        AVCaptureDevice.requestAccess(for: AVMediaType.video) { [weak self] response in
+            guard let self = self else { return }
+            if response {
+                self.setupAndStartCaptureSession()
+            } else {
+
+            }
+        }
+    }
+
+    public func stopCamera() {
+        previewLayer?.removeFromSuperlayer()
+        captureSession?.stopRunning()
+    }
+
+    //MARK:- Camera Setup
+    private func setupAndStartCaptureSession() {
+        // start camera session will block the main thread, so we start in background thread
+        DispatchQueue.global(qos: .userInitiated).async {
+            let captureSession = AVCaptureSession()
+            self.captureSession = captureSession
+            captureSession.beginConfiguration()
+
+            //session specific configuration
+            if captureSession.canSetSessionPreset(.photo) {
+                captureSession.sessionPreset = .photo
+            } else if captureSession.canSetSessionPreset(.high) {
+                captureSession.sessionPreset = .high
+            } else {
+                captureSession.sessionPreset = .medium
+            }
+            self.setupCameraInput()
+
+
+            captureSession.commitConfiguration()
+            captureSession.startRunning()
+
+            DispatchQueue.main.async {
+                self.setupPreviewLayer()
+            }
+        }
+    }
+
+    private func setupCameraInput() {
+        // use back camera only
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+            //handle this appropriately for production purposes
+            fatalError("no back camera")
+        }
+
+        guard let backInput = try? AVCaptureDeviceInput(device: device) else {
+            fatalError("could not create input device from back camera")
+        }
+
+        guard let captureSession = captureSession, captureSession.canAddInput(backInput) else {
+            fatalError("could not add back camera input to capture session")
+        }
+
+        captureSession.addInput(backInput)
+    }
+
+    private func setupPreviewLayer() {
+        guard let captureSession = captureSession else {
+            fatalError("could not get capture session")
+        }
+        let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer.videoGravity = .resizeAspectFill
+        self.previewLayer = previewLayer
+        layer.insertSublayer(previewLayer, at: 0)
+        previewLayer.frame = CGRect(origin: .zero, size: frame.size)
     }
 }

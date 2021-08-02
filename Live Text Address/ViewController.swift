@@ -67,11 +67,13 @@ class ViewController: UIViewController {
     private func cameraDidTap() {
         searchAddressTextField.inputAccessoryView = cameraToolbar
         searchAddressTextField.inputView = cameraInputView
+        cameraInputView.startCamera()
         searchAddressTextField.reloadInputViews()
     }
 
     @objc
     private func keyboardDidTap() {
+        cameraInputView.stopCamera()
         searchAddressTextField.inputAccessoryView = keyboardToolbar
         searchAddressTextField.inputView = nil
         searchAddressTextField.reloadInputViews()
