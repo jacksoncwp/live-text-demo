@@ -46,6 +46,12 @@ class CameraKeyboard: UIView {
             name: UIResponder.keyboardWillShowNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardDidHide(_:)),
+            name: UIResponder.keyboardDidHideNotification,
+            object: nil
+        )
 
         addSubview(aimContainerView)
         NSLayoutConstraint.activate([
@@ -93,6 +99,7 @@ class CameraKeyboard: UIView {
         ])
     }
 
+    // MARK: keyboard
     @objc
     private func keyboardWillShow(_ notification: UIKit.Notification) {
         guard
@@ -104,24 +111,38 @@ class CameraKeyboard: UIView {
         frame = .init(origin: .zero, size: keyboardFrame.size)
     }
 
+    @objc
+    private func keyboardDidHide(_ notification: UIKit.Notification) {
+        stopCamera()
+    }
+
+    // MARK: Camera
     public func startCamera() {
         AVCaptureDevice.requestAccess(for: AVMediaType.video) { [weak self] response in
             guard let self = self else { return }
             if response {
                 self.setupAndStartCaptureSession()
             } else {
-
+                // TODO: ask for permission
             }
         }
     }
 
-    public func stopCamera() {
+    private func stopCamera() {
         previewLayer?.removeFromSuperlayer()
         captureSession?.stopRunning()
-    }
 
-    //MARK:- Camera Setup
+        previewLayer = nil
+        captureSession = nil
+    }
+    
     private func setupAndStartCaptureSession() {
+        guard captureSession == nil else {
+            print("capture session already exists")
+            setupPreviewLayer()
+            return
+        }
+
         // start camera session will block the main thread, so we start in background thread
         DispatchQueue.global(qos: .userInitiated).async {
             let captureSession = AVCaptureSession()
@@ -137,7 +158,6 @@ class CameraKeyboard: UIView {
                 captureSession.sessionPreset = .medium
             }
             self.setupCameraInput()
-
 
             captureSession.commitConfiguration()
             captureSession.startRunning()
@@ -170,6 +190,12 @@ class CameraKeyboard: UIView {
         guard let captureSession = captureSession else {
             fatalError("could not get capture session")
         }
+
+        guard previewLayer == nil else {
+            print("preview layer already exists")
+            return
+        }
+
         let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = .resizeAspectFill
         self.previewLayer = previewLayer

@@ -73,7 +73,6 @@ class ViewController: UIViewController {
 
     @objc
     private func keyboardDidTap() {
-        cameraInputView.stopCamera()
         searchAddressTextField.inputAccessoryView = keyboardToolbar
         searchAddressTextField.inputView = nil
         searchAddressTextField.reloadInputViews()
@@ -82,6 +81,7 @@ class ViewController: UIViewController {
     @objc
     private func doneDidTap() {
         searchAddressTextField.resignFirstResponder()
+        keyboardDidTap()
     }
 
     @objc
