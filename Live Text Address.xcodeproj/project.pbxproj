@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,7 @@
 		D8206EC226B7C19200424F4A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D8206EC026B7C19200424F4A /* Main.storyboard */; };
 		D8206EC426B7C19200424F4A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D8206EC326B7C19200424F4A /* Assets.xcassets */; };
 		D8206EC726B7C19200424F4A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D8206EC526B7C19200424F4A /* LaunchScreen.storyboard */; };
+		D8206ED026B7D0FC00424F4A /* CameraKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8206ECF26B7D0FC00424F4A /* CameraKeyboard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		D8206EC326B7C19200424F4A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D8206EC626B7C19200424F4A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D8206EC826B7C19200424F4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D8206ECF26B7D0FC00424F4A /* CameraKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraKeyboard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,7 +50,6 @@
 				C0A519E05A96DEC82A9F1064 /* Pods-Live Text Address.debug.xcconfig */,
 				1B08B47BBC54048FD7F21717 /* Pods-Live Text Address.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -74,14 +75,23 @@
 			isa = PBXGroup;
 			children = (
 				D8206EBA26B7C19200424F4A /* AppDelegate.swift */,
+				D8206EC326B7C19200424F4A /* Assets.xcassets */,
+				D8206EC826B7C19200424F4A /* Info.plist */,
+				D8206ECE26B7D0D800424F4A /* Keyboard */,
+				D8206EC526B7C19200424F4A /* LaunchScreen.storyboard */,
+				D8206EC026B7C19200424F4A /* Main.storyboard */,
 				D8206EBC26B7C19200424F4A /* SceneDelegate.swift */,
 				D8206EBE26B7C19200424F4A /* ViewController.swift */,
-				D8206EC026B7C19200424F4A /* Main.storyboard */,
-				D8206EC326B7C19200424F4A /* Assets.xcassets */,
-				D8206EC526B7C19200424F4A /* LaunchScreen.storyboard */,
-				D8206EC826B7C19200424F4A /* Info.plist */,
 			);
 			path = "Live Text Address";
+			sourceTree = "<group>";
+		};
+		D8206ECE26B7D0D800424F4A /* Keyboard */ = {
+			isa = PBXGroup;
+			children = (
+				D8206ECF26B7D0FC00424F4A /* CameraKeyboard.swift */,
+			);
+			path = Keyboard;
 			sourceTree = "<group>";
 		};
 		FD95BEFA83079B34725FB821 /* Frameworks */ = {
@@ -207,6 +217,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D8206EBF26B7C19200424F4A /* ViewController.swift in Sources */,
+				D8206ED026B7D0FC00424F4A /* CameraKeyboard.swift in Sources */,
 				D8206EBB26B7C19200424F4A /* AppDelegate.swift in Sources */,
 				D8206EBD26B7C19200424F4A /* SceneDelegate.swift in Sources */,
 			);
