@@ -7,6 +7,7 @@
 
 import AVFoundation
 import UIKit
+import Vision
 
 class CameraKeyboard: UIView {
 
@@ -149,15 +150,9 @@ class CameraKeyboard: UIView {
             self.captureSession = captureSession
             captureSession.beginConfiguration()
 
-            //session specific configuration
-            if captureSession.canSetSessionPreset(.photo) {
-                captureSession.sessionPreset = .photo
-            } else if captureSession.canSetSessionPreset(.high) {
-                captureSession.sessionPreset = .high
-            } else {
-                captureSession.sessionPreset = .medium
-            }
-            self.setupCameraInput()
+            captureSession.sessionPreset = .medium // medium quality is good enough for text recognition
+            self.setupCameraInput(captureSession: captureSession)
+            self.setupOutput(captureSession: captureSession)
 
             captureSession.commitConfiguration()
             captureSession.startRunning()
@@ -168,7 +163,7 @@ class CameraKeyboard: UIView {
         }
     }
 
-    private func setupCameraInput() {
+    private func setupCameraInput(captureSession: AVCaptureSession) {
         // use back camera only
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
             //handle this appropriately for production purposes
@@ -179,7 +174,7 @@ class CameraKeyboard: UIView {
             fatalError("could not create input device from back camera")
         }
 
-        guard let captureSession = captureSession, captureSession.canAddInput(backInput) else {
+        guard captureSession.canAddInput(backInput) else {
             fatalError("could not add back camera input to capture session")
         }
 
@@ -201,5 +196,67 @@ class CameraKeyboard: UIView {
         self.previewLayer = previewLayer
         layer.insertSublayer(previewLayer, at: 0)
         previewLayer.frame = CGRect(origin: .zero, size: frame.size)
+    }
+
+    private func setupOutput(captureSession: AVCaptureSession) {
+        let videoOutput = AVCaptureVideoDataOutput()
+        videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+        let videoQueue = DispatchQueue(label: "videoQueue", qos: .userInteractive)
+        videoOutput.setSampleBufferDelegate(self, queue: videoQueue)
+
+        if captureSession.canAddOutput(videoOutput) == true {
+            captureSession.addOutput(videoOutput)
+        } else {
+            fatalError("could not add video output")
+        }
+
+        videoOutput.connections.first?.videoOrientation = .portrait
+    }
+
+    // MARK: text recognition
+    private func detectText(buffer: CVPixelBuffer) {
+        let request = VNRecognizeTextRequest(completionHandler: textRecognitionHandler)
+          request.recognitionLanguages = ["en_US"]
+          request.recognitionLevel = .accurate
+
+          performDetection(request: request, buffer: buffer)
+    }
+
+    func performDetection(request: VNRecognizeTextRequest, buffer: CVPixelBuffer) {
+        let requests = [request]
+        let handler = VNImageRequestHandler(cvPixelBuffer: buffer, orientation: .up, options: [:])
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try handler.perform(requests)
+            } catch let error {
+                print("Error: \(error)")
+            }
+        }
+    }
+
+    private func textRecognitionHandler(request: VNRequest, error: Error?) {
+        guard let observations = request.results else {
+            print("no result")
+            return
+        }
+
+        let results = observations.compactMap { $0 as? VNRecognizedTextObservation }
+        for result in results {
+            for text in result.topCandidates(1) where text.confidence == 1 {
+                // TODO: find the text in the middle
+                print("recognized text: \(text.string) boundingBox: \(result.boundingBox)")
+            }
+        }
+    }
+}
+
+extension CameraKeyboard: AVCaptureVideoDataOutputSampleBufferDelegate {
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        guard let cvBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            return
+        }
+
+        detectText(buffer: cvBuffer)
     }
 }
