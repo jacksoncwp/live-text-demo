@@ -216,10 +216,11 @@ class CameraKeyboard: UIView {
     // MARK: text recognition
     private func detectText(buffer: CVPixelBuffer) {
         let request = VNRecognizeTextRequest(completionHandler: textRecognitionHandler)
-          request.recognitionLanguages = ["en_US"]
-          request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["en_US"]
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
 
-          performDetection(request: request, buffer: buffer)
+        performDetection(request: request, buffer: buffer)
     }
 
     func performDetection(request: VNRecognizeTextRequest, buffer: CVPixelBuffer) {
@@ -243,7 +244,9 @@ class CameraKeyboard: UIView {
 
         let results = observations.compactMap { $0 as? VNRecognizedTextObservation }
         for result in results {
-            for text in result.topCandidates(1) where text.confidence == 1 {
+            // find the recognized text in the center of image with a v high confidence
+            for text in result.topCandidates(1)
+            where text.confidence >= 0.95 && result.boundingBox.contains(.init(x: 0.5, y: 0.5)) {
                 // TODO: find the text in the middle
                 print("recognized text: \(text.string) boundingBox: \(result.boundingBox)")
             }
