@@ -64,9 +64,6 @@ class CameraKeyboard: UIView {
             aimContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
         addAimView()
-
-        // uncomnent to print all supported locale
-//        print("supportedRecognitionLanguages: \(try? VNRecognizeTextRequest.supportedRecognitionLanguages(for: .accurate, revision: 2) )")
     }
 
     private func addAimView() {
@@ -223,7 +220,14 @@ class CameraKeyboard: UIView {
     // MARK: text recognition
     private func detectText(buffer: CVPixelBuffer) {
         let request = VNRecognizeTextRequest(completionHandler: textRecognitionHandler)
-        request.recognitionLanguages = ["zh-Hant", "en-US"]
+        if let langs = try? VNRecognizeTextRequest.supportedRecognitionLanguages(for: .accurate, revision: 2),
+           langs.contains("zh-Hant") {
+            // recognize chinese if supported
+            request.recognitionLanguages = ["zh-Hant", "en-US"]
+        } else {
+            request.recognitionLanguages = ["en-US"]
+        }
+
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
 
