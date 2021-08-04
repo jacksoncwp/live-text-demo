@@ -16,6 +16,7 @@ class ViewController: UIViewController {
         textField.placeholder = "Search Address"
         textField.autocorrectionType = .no
         textField.returnKeyType = .search
+        textField.clearButtonMode = .whileEditing
 
         return textField
     } ()
@@ -59,8 +60,10 @@ class ViewController: UIViewController {
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(48)
         }
-        searchAddressTextField.addTarget(self, action: #selector(addressDidChange), for: .editingChanged)
+        searchAddressTextField.addTarget(self, action: #selector(addressDidChange), for: .valueChanged)
         searchAddressTextField.inputAccessoryView = keyboardToolbar
+
+        cameraInputView.textField = self.searchAddressTextField
     }
 
     @objc

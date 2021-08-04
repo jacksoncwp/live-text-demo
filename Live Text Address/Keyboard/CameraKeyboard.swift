@@ -10,9 +10,11 @@ import UIKit
 import Vision
 
 class CameraKeyboard: UIView {
+    weak var textField: UITextField?
 
     private var captureSession: AVCaptureSession?
     private var previewLayer: AVCaptureVideoPreviewLayer?
+    private var recognizedTextBoxLayer: CALayer?
 
     private lazy var aimContainerView: UIView = {
         let view = UIView(frame: self.frame)
@@ -62,6 +64,9 @@ class CameraKeyboard: UIView {
             aimContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
         addAimView()
+
+        // uncomnent to print all supported locale
+//        print("supportedRecognitionLanguages: \(try? VNRecognizeTextRequest.supportedRecognitionLanguages(for: .accurate, revision: 2) )")
     }
 
     private func addAimView() {
@@ -109,6 +114,7 @@ class CameraKeyboard: UIView {
         else {
             return
         }
+        // sync the view size with keyboard size
         frame = .init(origin: .zero, size: keyboardFrame.size)
     }
 
@@ -135,6 +141,7 @@ class CameraKeyboard: UIView {
 
         previewLayer = nil
         captureSession = nil
+        clearTextBoxLayer()
     }
     
     private func setupAndStartCaptureSession() {
@@ -216,7 +223,7 @@ class CameraKeyboard: UIView {
     // MARK: text recognition
     private func detectText(buffer: CVPixelBuffer) {
         let request = VNRecognizeTextRequest(completionHandler: textRecognitionHandler)
-        request.recognitionLanguages = ["en_US"]
+        request.recognitionLanguages = ["zh-Hant", "en-US"]
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
 
@@ -238,19 +245,56 @@ class CameraKeyboard: UIView {
 
     private func textRecognitionHandler(request: VNRequest, error: Error?) {
         guard let observations = request.results else {
-            print("no result")
+            // no result
+            DispatchQueue.main.async {
+                self.clearTextBoxLayer()
+            }
             return
         }
 
         let results = observations.compactMap { $0 as? VNRecognizedTextObservation }
+        DispatchQueue.main.async {
+            self.clearTextBoxLayer()
+        }
         for result in results {
             // find the recognized text in the center of image with a v high confidence
             for text in result.topCandidates(1)
-            where text.confidence >= 0.95 && result.boundingBox.contains(.init(x: 0.5, y: 0.5)) {
-                // TODO: find the text in the middle
-                print("recognized text: \(text.string) boundingBox: \(result.boundingBox)")
+            where text.confidence >= 0.9 && result.boundingBox.contains(.init(x: 0.5, y: 0.5)) {
+                DispatchQueue.main.async {
+                    self.textField?.text = text.string.trimmingCharacters(in: .whitespacesAndNewlines)
+                    self.textField?.sendActions(for: .valueChanged)
+                    self.highlightWord(box: result)
+                }
+
+                return // use the first one only
             }
         }
+    }
+
+    private func highlightWord(box: VNRecognizedTextObservation) {
+        recognizedTextBoxLayer?.removeFromSuperlayer()
+
+        let xCord = box.topLeft.x * frame.size.width
+        let yCord = (1 - box.topLeft.y) * frame.size.height
+        let width = (box.topRight.x - box.bottomLeft.x) * frame.size.width
+        let height = (box.topLeft.y - box.bottomLeft.y) * frame.size.height
+
+        let outline = CALayer()
+        outline.frame = CGRect(x: xCord, y: yCord, width: width, height: height)
+        outline.borderWidth = 1.0
+        outline.borderColor = UIColor.red.cgColor
+        recognizedTextBoxLayer = outline
+
+        if let layer = previewLayer {
+            layer.insertSublayer(outline, above: layer)
+        } else {
+            layer.insertSublayer(outline, at: 0)
+        }
+    }
+
+    private func clearTextBoxLayer() {
+        recognizedTextBoxLayer?.removeFromSuperlayer()
+        recognizedTextBoxLayer = nil
     }
 }
 
