@@ -5,10 +5,15 @@
 //  Created by Jackson Chung on 2/8/2021.
 //
 
+import AVFoundation
 import SnapKit
 import UIKit
 
 class ViewController: UIViewController {
+
+    private let synthesizer = AVSpeechSynthesizer()
+    private var lastSpokenAddress: String?
+    private var autoSpeak = false
 
     private lazy var searchAddressTextField: UITextField = {
         let textField = UITextField()
@@ -35,15 +40,17 @@ class ViewController: UIViewController {
 
     private lazy var cameraToolbar: UIToolbar = {
         let toolbar = UIToolbar(frame: .init(x: 0, y: 0, width: 320, height: 44))
-        let flexible = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: self, action: nil)
-        let keyboardBtn = UIBarButtonItem(title: "Keyboard", style: .plain, target: self, action: #selector(keyboardDidTap))
-        let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
-
-        toolbar.items = [flexible, keyboardBtn, doneBtn]
+        toolbar.items = [flexible, playBtn, keyboardBtn, doneBtn]
         toolbar.sizeToFit()
 
         return toolbar
     } ()
+
+    private var flexible = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+    private var playBtn = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(playDidTap))
+    private var pauseBtn = UIBarButtonItem(barButtonSystemItem: .pause, target: self, action: #selector(playDidTap))
+    private let keyboardBtn = UIBarButtonItem(title: "Keyboard", style: .plain, target: self, action: #selector(keyboardDidTap))
+    private let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
 
     private var cameraInputView: CameraKeyboard = {
         let view = CameraKeyboard()
@@ -64,6 +71,12 @@ class ViewController: UIViewController {
         searchAddressTextField.inputAccessoryView = keyboardToolbar
 
         cameraInputView.textField = self.searchAddressTextField
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        searchAddressTextField.becomeFirstResponder()
     }
 
     @objc
@@ -88,7 +101,36 @@ class ViewController: UIViewController {
     }
 
     @objc
+    private func playDidTap() {
+        if autoSpeak {
+            autoSpeak = false
+            synthesizer.stopSpeaking(at: .immediate)
+            cameraToolbar.items = [flexible, playBtn, keyboardBtn, doneBtn]
+        } else {
+            autoSpeak = true
+            speakInputedAddress()
+            cameraToolbar.items = [flexible, pauseBtn, keyboardBtn, doneBtn]
+        }
+    }
+
+    private func speakInputedAddress() {
+        guard !synthesizer.isSpeaking else {
+            return
+        }
+
+        if let speechText = searchAddressTextField.text, !speechText.isEmpty {
+            lastSpokenAddress = speechText
+            let speech = AVSpeechUtterance(string: speechText)
+            speech.voice = .init(language: "zh-HK") // cantonese and english
+            speech.prefersAssistiveTechnologySettings = true
+            synthesizer.speak(speech)
+        }
+    }
+
+    @objc
     private func addressDidChange() {
-        print("search address: \(searchAddressTextField.text ?? "")")
+        if autoSpeak, searchAddressTextField.text != lastSpokenAddress {
+            speakInputedAddress()
+        }
     }
 }
