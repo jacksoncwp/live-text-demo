@@ -261,9 +261,9 @@ class CameraKeyboard: UIView {
             self.clearTextBoxLayer()
         }
         for result in results {
-            // find the recognized text in the center of image with a v high confidence
+            // find the recognized text in the center of image with certain confidence
             for text in result.topCandidates(1)
-            where text.confidence >= 0.9 && result.boundingBox.contains(.init(x: 0.5, y: 0.5)) {
+            where text.confidence >= 0.5 && result.boundingBox.contains(.init(x: 0.5, y: 0.5)) {
                 DispatchQueue.main.async {
                     self.textField?.text = text.string.trimmingCharacters(in: .whitespacesAndNewlines)
                     self.textField?.sendActions(for: .valueChanged)

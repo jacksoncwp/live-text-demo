@@ -6,15 +6,64 @@
 //
 
 import AVFoundation
+import MapKit
 import SnapKit
 import UIKit
 
 class ViewController: UIViewController {
 
+    // search address
+    private lazy var addressCompleter: MKLocalSearchCompleter = {
+        let completer = MKLocalSearchCompleter()
+        completer.region = MKCoordinateRegion(center: .init(latitude: 22.2975715, longitude: 114.1722044),
+                                              latitudinalMeters: 10_000,
+                                              longitudinalMeters: 10_000)
+        completer.delegate = self
+        return completer
+    } ()
+    private var searchAddressResults = [MKLocalSearchCompletion]()
+    private lazy var addressResultTableView: UITableView = {
+        let tableView = UITableView(frame: .zero, style: .plain)
+        tableView.dataSource = self
+
+        return tableView
+    }()
+
+    // text to speech
     private let synthesizer = AVSpeechSynthesizer()
     private var lastSpokenAddress: String?
     private var autoSpeak = false
 
+    // toolbar
+    private lazy var keyboardToolbar: UIToolbar = {
+        let toolbar = UIToolbar(frame: .init(x: 0, y: 0, width: 320, height: 44))
+        let flexible = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: self, action: nil)
+        let searchBtn = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchDidTap))
+        let cameraBtn = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(cameraDidTap))
+        let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
+
+        toolbar.items = [flexible, searchBtn, cameraBtn, doneBtn]
+        toolbar.sizeToFit()
+
+        return toolbar
+    } ()
+
+    private lazy var cameraToolbar: UIToolbar = {
+        let toolbar = UIToolbar(frame: .init(x: 0, y: 0, width: 320, height: 44))
+        toolbar.items = [flexible, playBtn, searchBtn, keyboardBtn, doneBtn]
+        toolbar.sizeToFit()
+
+        return toolbar
+    } ()
+
+    private var flexible = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+    private var playBtn = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(playDidTap))
+    private var pauseBtn = UIBarButtonItem(barButtonSystemItem: .pause, target: self, action: #selector(playDidTap))
+    private var searchBtn = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchDidTap))
+    private let keyboardBtn = UIBarButtonItem(title: "Keyboard", style: .plain, target: self, action: #selector(keyboardDidTap))
+    private let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
+
+    // textfield
     private lazy var searchAddressTextField: UITextField = {
         let textField = UITextField()
         textField.borderStyle = .roundedRect
@@ -25,32 +74,6 @@ class ViewController: UIViewController {
 
         return textField
     } ()
-
-    private lazy var keyboardToolbar: UIToolbar = {
-        let toolbar = UIToolbar(frame: .init(x: 0, y: 0, width: 320, height: 44))
-        let flexible = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: self, action: nil)
-        let cameraBtn = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(cameraDidTap))
-        let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
-
-        toolbar.items = [flexible, cameraBtn, doneBtn]
-        toolbar.sizeToFit()
-
-        return toolbar
-    } ()
-
-    private lazy var cameraToolbar: UIToolbar = {
-        let toolbar = UIToolbar(frame: .init(x: 0, y: 0, width: 320, height: 44))
-        toolbar.items = [flexible, playBtn, keyboardBtn, doneBtn]
-        toolbar.sizeToFit()
-
-        return toolbar
-    } ()
-
-    private var flexible = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
-    private var playBtn = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(playDidTap))
-    private var pauseBtn = UIBarButtonItem(barButtonSystemItem: .pause, target: self, action: #selector(playDidTap))
-    private let keyboardBtn = UIBarButtonItem(title: "Keyboard", style: .plain, target: self, action: #selector(keyboardDidTap))
-    private let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
 
     private var cameraInputView: CameraKeyboard = {
         let view = CameraKeyboard()
@@ -69,6 +92,13 @@ class ViewController: UIViewController {
         }
         searchAddressTextField.addTarget(self, action: #selector(addressDidChange), for: .valueChanged)
         searchAddressTextField.inputAccessoryView = keyboardToolbar
+
+        view.addSubview(addressResultTableView)
+        addressResultTableView.snp.makeConstraints {
+            $0.top.equalTo(searchAddressTextField.snp.bottom).inset(-16)
+            $0.bottom.equalToSuperview().inset(16)
+            $0.leading.trailing.bottom.equalToSuperview()
+        }
 
         cameraInputView.textField = self.searchAddressTextField
     }
@@ -101,15 +131,24 @@ class ViewController: UIViewController {
     }
 
     @objc
+    private func searchDidTap() {
+        guard !addressCompleter.isSearching, let searchText = searchAddressTextField.text, !searchText.isEmpty else {
+            return
+        }
+
+        addressCompleter.queryFragment = searchText
+    }
+
+    @objc
     private func playDidTap() {
         if autoSpeak {
             autoSpeak = false
             synthesizer.stopSpeaking(at: .immediate)
-            cameraToolbar.items = [flexible, playBtn, keyboardBtn, doneBtn]
+            cameraToolbar.items = [flexible, playBtn, searchBtn, keyboardBtn, doneBtn]
         } else {
             autoSpeak = true
             speakInputedAddress()
-            cameraToolbar.items = [flexible, pauseBtn, keyboardBtn, doneBtn]
+            cameraToolbar.items = [flexible, pauseBtn, searchBtn, keyboardBtn, doneBtn]
         }
     }
 
@@ -132,5 +171,32 @@ class ViewController: UIViewController {
         if autoSpeak, searchAddressTextField.text != lastSpokenAddress {
             speakInputedAddress()
         }
+    }
+}
+
+extension ViewController: MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        // show the top 5 results
+        searchAddressResults = Array(completer.results.prefix(5))
+        addressResultTableView.reloadData()
+    }
+}
+
+extension ViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        searchAddressResults.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let searchResult = searchAddressResults[indexPath.row]
+
+        let identifier = "searchResult"
+        let cell = tableView.dequeueReusableCell(withIdentifier: identifier)
+            ?? UITableViewCell(style: .subtitle, reuseIdentifier: identifier)
+
+        cell.textLabel?.text = searchResult.title
+        cell.detailTextLabel?.text = searchResult.subtitle
+
+        return cell
     }
 }
