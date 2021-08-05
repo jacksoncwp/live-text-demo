@@ -7,7 +7,6 @@
 
 import AVFoundation
 import MapKit
-import SnapKit
 import UIKit
 
 class ViewController: UIViewController {
@@ -25,6 +24,7 @@ class ViewController: UIViewController {
     private lazy var addressResultTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.dataSource = self
+        tableView.separatorInset = .init(top: 0, left: 16, bottom: 0, right: 16)
 
         return tableView
     }()
@@ -83,22 +83,27 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-
-        view.addSubview(searchAddressTextField)
-        searchAddressTextField.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(16)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(48)
-        }
         searchAddressTextField.addTarget(self, action: #selector(addressDidChange), for: .valueChanged)
         searchAddressTextField.inputAccessoryView = keyboardToolbar
 
+        view.addSubview(searchAddressTextField)
         view.addSubview(addressResultTableView)
-        addressResultTableView.snp.makeConstraints {
-            $0.top.equalTo(searchAddressTextField.snp.bottom).inset(-16)
-            $0.bottom.equalToSuperview().inset(16)
-            $0.leading.trailing.bottom.equalToSuperview()
-        }
+
+        searchAddressTextField.translatesAutoresizingMaskIntoConstraints = false
+        addressResultTableView.translatesAutoresizingMaskIntoConstraints = false
+
+        let margin: CGFloat = 0
+        NSLayoutConstraint.activate([
+            searchAddressTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: margin),
+            searchAddressTextField.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor, constant: margin),
+            searchAddressTextField.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor, constant: -margin),
+            searchAddressTextField.heightAnchor.constraint(equalToConstant: 48),
+
+            addressResultTableView.topAnchor.constraint(equalTo: searchAddressTextField.bottomAnchor, constant: margin),
+            addressResultTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            addressResultTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            addressResultTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
 
         cameraInputView.textField = self.searchAddressTextField
     }
