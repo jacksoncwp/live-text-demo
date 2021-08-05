@@ -3,11 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		258B7437649BB83583926CF9 /* Pods_Live_Text_Address.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75FEF9ADD5ACC929531E50DB /* Pods_Live_Text_Address.framework */; };
 		D8206EBB26B7C19200424F4A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8206EBA26B7C19200424F4A /* AppDelegate.swift */; };
 		D8206EBD26B7C19200424F4A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8206EBC26B7C19200424F4A /* SceneDelegate.swift */; };
 		D8206EBF26B7C19200424F4A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8206EBE26B7C19200424F4A /* ViewController.swift */; };
@@ -18,9 +17,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1B08B47BBC54048FD7F21717 /* Pods-Live Text Address.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Live Text Address.release.xcconfig"; path = "Target Support Files/Pods-Live Text Address/Pods-Live Text Address.release.xcconfig"; sourceTree = "<group>"; };
-		75FEF9ADD5ACC929531E50DB /* Pods_Live_Text_Address.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Live_Text_Address.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0A519E05A96DEC82A9F1064 /* Pods-Live Text Address.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Live Text Address.debug.xcconfig"; path = "Target Support Files/Pods-Live Text Address/Pods-Live Text Address.debug.xcconfig"; sourceTree = "<group>"; };
 		D8206EB726B7C19200424F4A /* Live Text Address.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Live Text Address.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8206EBA26B7C19200424F4A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D8206EBC26B7C19200424F4A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -37,29 +33,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				258B7437649BB83583926CF9 /* Pods_Live_Text_Address.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AB061D6850345F73BC6774A9 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				C0A519E05A96DEC82A9F1064 /* Pods-Live Text Address.debug.xcconfig */,
-				1B08B47BBC54048FD7F21717 /* Pods-Live Text Address.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		D8206EAE26B7C19200424F4A = {
 			isa = PBXGroup;
 			children = (
 				D8206EB926B7C19200424F4A /* Live Text Address */,
 				D8206EB826B7C19200424F4A /* Products */,
-				AB061D6850345F73BC6774A9 /* Pods */,
-				FD95BEFA83079B34725FB821 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -94,14 +78,6 @@
 			path = Keyboard;
 			sourceTree = "<group>";
 		};
-		FD95BEFA83079B34725FB821 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				75FEF9ADD5ACC929531E50DB /* Pods_Live_Text_Address.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -109,11 +85,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D8206ECB26B7C19200424F4A /* Build configuration list for PBXNativeTarget "Live Text Address" */;
 			buildPhases = (
-				3946432D586A818D450112FE /* [CP] Check Pods Manifest.lock */,
 				D8206EB326B7C19200424F4A /* Sources */,
 				D8206EB426B7C19200424F4A /* Frameworks */,
 				D8206EB526B7C19200424F4A /* Resources */,
-				942C194BF8BD40DA32D20A33 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -168,48 +142,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		3946432D586A818D450112FE /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Live Text Address-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		942C194BF8BD40DA32D20A33 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Live Text Address/Pods-Live Text Address-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Live Text Address/Pods-Live Text Address-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Live Text Address/Pods-Live Text Address-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D8206EB326B7C19200424F4A /* Sources */ = {
@@ -296,7 +228,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -351,7 +283,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -363,7 +295,6 @@
 		};
 		D8206ECC26B7C19200424F4A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C0A519E05A96DEC82A9F1064 /* Pods-Live Text Address.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -383,7 +314,6 @@
 		};
 		D8206ECD26B7C19200424F4A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1B08B47BBC54048FD7F21717 /* Pods-Live Text Address.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

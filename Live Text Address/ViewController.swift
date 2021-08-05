@@ -166,7 +166,9 @@ class ViewController: UIViewController {
             lastSpokenAddress = speechText
             let speech = AVSpeechUtterance(string: speechText)
             speech.voice = .init(language: "zh-HK") // cantonese and english
-            speech.prefersAssistiveTechnologySettings = true
+            if #available(iOS 14.0, *) {
+                speech.prefersAssistiveTechnologySettings = true
+            }
             synthesizer.speak(speech)
         }
     }
