@@ -14,9 +14,9 @@ class ViewController: UIViewController {
     // search address
     private lazy var addressCompleter: MKLocalSearchCompleter = {
         let completer = MKLocalSearchCompleter()
-        completer.region = MKCoordinateRegion(center: .init(latitude: 22.2975715, longitude: 114.1722044),
-                                              latitudinalMeters: 10_000,
-                                              longitudinalMeters: 10_000)
+        completer.region = MKCoordinateRegion(center: .init(latitude: 22.2975715, longitude: 114.1722044), // default location = Tsim Sha Tsui
+                                              latitudinalMeters: 1000,
+                                              longitudinalMeters: 1000)
         completer.delegate = self
         return completer
     } ()
@@ -181,8 +181,8 @@ class ViewController: UIViewController {
 
 extension ViewController: MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        // show the top 5 results
-        searchAddressResults = Array(completer.results.prefix(5))
+        // show the top 10 results
+        searchAddressResults = Array(completer.results.prefix(10))
         addressResultTableView.reloadData()
     }
 }
