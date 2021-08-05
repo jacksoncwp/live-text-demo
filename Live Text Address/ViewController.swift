@@ -136,6 +136,14 @@ class ViewController: UIViewController {
     }
 
     @objc
+    private func addressDidChange() {
+        if autoSpeak, searchAddressTextField.text != lastSpokenAddress {
+            speakInputedAddress()
+        }
+    }
+
+    // MARK: search address
+    @objc
     private func searchDidTap() {
         guard !addressCompleter.isSearching, let searchText = searchAddressTextField.text, !searchText.isEmpty else {
             return
@@ -144,6 +152,7 @@ class ViewController: UIViewController {
         addressCompleter.queryFragment = searchText
     }
 
+    // MARK: text to speech
     @objc
     private func playDidTap() {
         if autoSpeak {
@@ -170,13 +179,6 @@ class ViewController: UIViewController {
                 speech.prefersAssistiveTechnologySettings = true
             }
             synthesizer.speak(speech)
-        }
-    }
-
-    @objc
-    private func addressDidChange() {
-        if autoSpeak, searchAddressTextField.text != lastSpokenAddress {
-            speakInputedAddress()
         }
     }
 }
