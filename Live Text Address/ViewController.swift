@@ -38,11 +38,10 @@ class ViewController: UIViewController {
     private lazy var keyboardToolbar: UIToolbar = {
         let toolbar = UIToolbar(frame: .init(x: 0, y: 0, width: 320, height: 44))
         let flexible = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: self, action: nil)
-        let searchBtn = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchDidTap))
         let cameraBtn = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(cameraDidTap))
         let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
 
-        toolbar.items = [flexible, searchBtn, cameraBtn, doneBtn]
+        toolbar.items = [flexible, cameraBtn, doneBtn]
         toolbar.sizeToFit()
 
         return toolbar
@@ -59,7 +58,7 @@ class ViewController: UIViewController {
     private var flexible = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
     private var playBtn = UIBarButtonItem(barButtonSystemItem: .play, target: self, action: #selector(playDidTap))
     private var pauseBtn = UIBarButtonItem(barButtonSystemItem: .pause, target: self, action: #selector(playDidTap))
-    private var searchBtn = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchDidTap))
+    private var searchBtn = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchAddress))
     private let keyboardBtn = UIBarButtonItem(title: "Keyboard", style: .plain, target: self, action: #selector(keyboardDidTap))
     private let doneBtn = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDidTap))
 
@@ -69,8 +68,10 @@ class ViewController: UIViewController {
         textField.borderStyle = .roundedRect
         textField.placeholder = "Search Address"
         textField.autocorrectionType = .no
+        textField.textContentType = .oneTimeCode // hide the predictive text
         textField.returnKeyType = .search
         textField.clearButtonMode = .whileEditing
+        textField.delegate = self
 
         return textField
     } ()
@@ -144,7 +145,7 @@ class ViewController: UIViewController {
 
     // MARK: search address
     @objc
-    private func searchDidTap() {
+    private func searchAddress() {
         guard !addressCompleter.isSearching, let searchText = searchAddressTextField.text, !searchText.isEmpty else {
             return
         }
@@ -180,6 +181,13 @@ class ViewController: UIViewController {
             }
             synthesizer.speak(speech)
         }
+    }
+}
+
+extension ViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        searchAddress()
+        return true
     }
 }
 
