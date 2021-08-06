@@ -11,7 +11,7 @@ In this demo, we do not have the smart content type detection of Live Text in iO
 1. Open `Live Text Address.xcodeproj` with Xcode
 2. Build and run in device (Simulator is not supported because it does not have a camera)
 
-# Requirement
+# Environment Requirement
 1. Xcode 12
 2. Min. supported iOS: 13
 
