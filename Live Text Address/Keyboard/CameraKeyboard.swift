@@ -142,9 +142,9 @@ class CameraKeyboard: UIView {
     }
     
     private func setupAndStartCaptureSession() {
-        guard captureSession == nil else {
+        if let captureSession = self.captureSession {
             print("capture session already exists")
-            setupPreviewLayer()
+            setupPreviewLayer(captureSession: captureSession)
             return
         }
 
@@ -162,7 +162,7 @@ class CameraKeyboard: UIView {
             captureSession.startRunning()
 
             DispatchQueue.main.async {
-                self.setupPreviewLayer()
+                self.setupPreviewLayer(captureSession: captureSession)
             }
         }
     }
@@ -185,11 +185,7 @@ class CameraKeyboard: UIView {
         captureSession.addInput(backInput)
     }
 
-    private func setupPreviewLayer() {
-        guard let captureSession = captureSession else {
-            fatalError("could not get capture session")
-        }
-
+    private func setupPreviewLayer(captureSession: AVCaptureSession) {
         guard previewLayer == nil else {
             print("preview layer already exists")
             return
@@ -220,7 +216,7 @@ class CameraKeyboard: UIView {
     // MARK: text recognition
     private func detectText(buffer: CVPixelBuffer) {
         let request = VNRecognizeTextRequest(completionHandler: textRecognitionHandler)
-        if let langs = try? VNRecognizeTextRequest.supportedRecognitionLanguages(for: .accurate, revision: 2),
+        if let langs = try? VNRecognizeTextRequest.supportedRecognitionLanguages(for: .accurate, revision: VNRecognizeTextRequest.defaultRevision),
            langs.contains("zh-Hant") {
             // recognize chinese if supported
             request.recognitionLanguages = ["zh-Hant", "en-US"]
@@ -278,6 +274,8 @@ class CameraKeyboard: UIView {
     private func highlightWord(box: VNRecognizedTextObservation) {
         recognizedTextBoxLayer?.removeFromSuperlayer()
 
+        // the bounding box is originated from bottom left corner with normalized value (0-1)
+        // so we need to convert it to the view coordinate system
         let xCord = box.topLeft.x * frame.size.width
         let yCord = (1 - box.topLeft.y) * frame.size.height
         let width = (box.topRight.x - box.bottomLeft.x) * frame.size.width
